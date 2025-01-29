@@ -1,0 +1,25 @@
+.form-container {
+    max-width: 400px;
+    margin: auto;
+  }
+  
+  mat-form-field {
+    width: 100%;
+  }
+  
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .half-width {
+    flex: 1;
+  }
+  
+  .submit-btn {
+    display: block;
+    margin: 20px auto;
+    border-radius: 20px;
+    font-weight: bold;
+  }
+  
