@@ -9,6 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router'; // ✅ Import RouterModule
+import { NgChartsModule } from 'ng2-charts';
+import {ChartsModule} from 'ng2-charts';
 
 
 @NgModule({
@@ -21,7 +23,9 @@ import { RouterModule } from '@angular/router'; // ✅ Import RouterModule
     MatSelectModule,
     RouterModule.forRoot([]), 
     MatButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgChartsModule,
+    ChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

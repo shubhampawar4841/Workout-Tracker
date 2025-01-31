@@ -1,76 +1,139 @@
-// src/app/components/workout-chart/workout-chart.component.ts
-import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../services/user.service';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
+interface WorkoutData {
+  name: string;
+  workouts: string[];
+  workoutMinutes: number[];
+}
 
 @Component({
   selector: 'app-workout-chart',
+  standalone: true,
+  imports: [CommonModule],
   template: `
-    <div class="p-4 bg-white rounded-lg shadow-md">
-      <h2 class="text-xl font-bold mb-4">Workout Progress</h2>
-      <div class="h-96">
-        <div [id]="chartId"></div>
+    <div class="flex justify-between gap-8 p-6 max-w-6xl mx-auto">
+      <div class="flex-1 max-w-xs p-6 bg-gray-100 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-center mb-4">Select a User:</h2>
+        <ul class="space-y-3">
+          <li *ngFor="let user of workoutData" 
+              (click)="selectUser(user)"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer text-center hover:bg-blue-700">
+            {{ user.name }}
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="selectedUser" class="flex-3 max-w-2xl p-6 bg-white rounded-lg shadow-md">
+        <h3 class="text-2xl font-semibold text-center mb-4">{{ selectedUser.name }}'s Workout Progress</h3>
+        <canvas id="workoutChart" class="w-full h-96 bg-gray-100 rounded-lg"></canvas>
       </div>
     </div>
-  `
+  `,
+  styles: []
 })
-export class WorkoutChartComponent implements OnInit {
-  chartId = 'workout-chart';
-  chartData: any[] = [];
+export class WorkoutChartComponent implements OnInit, OnDestroy {
+  private chart: any;
+  workoutData: WorkoutData[] = [];
+  selectedUser: WorkoutData | null = null;
 
-  constructor(private userService: UserService) {}
+  constructor(private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void {
-    this.userService.getUsers().subscribe(users => {
-      const workoutsByType = new Map<string, number>();
-      
-      users.forEach(user => {
-        user.workouts.forEach(workout => {
-          const current = workoutsByType.get(workout.type) || 0;
-          workoutsByType.set(workout.type, current + workout.minutes);
-        });
-      });
-
-      this.chartData = Array.from(workoutsByType.entries()).map(([type, minutes]) => ({
-        name: type,
-        value: minutes
-      }));
-
-      this.renderChart();
-    });
+  ngOnInit() {
+    console.log('Initializing WorkoutChartComponent...');
+    this.loadChartData();
   }
 
-  private renderChart(): void {
-    const data = {
-      labels: this.chartData.map(item => item.name),
-      datasets: [{
-        data: this.chartData.map(item => item.value),
-        backgroundColor: [
-          '#4C51BF',
-          '#48BB78',
-          '#ED8936',
-          '#9F7AEA'
-        ]
-      }]
-    };
+  loadChartData() {
+    try {
+      const storedData = localStorage.getItem('workoutData');
+      console.log('Loaded data from localStorage:', storedData);
 
-    const config = {
-      type: 'pie',
-      data: data,
+      if (storedData) {
+        this.workoutData = JSON.parse(storedData);
+      } else {
+        console.log('No workout data found in localStorage.');
+      }
+    } catch (error) {
+      console.error('Error loading workout data:', error);
+    }
+  }
+
+  selectUser(user: WorkoutData) {
+    console.log('Selected user:', user);
+    this.selectedUser = user;
+
+    // Trigger change detection to ensure the DOM updates after the selection
+    this.cdr.detectChanges();
+
+    this.createChart(user);
+  }
+
+  createChart(user: WorkoutData) {
+    const canvas = document.getElementById('workoutChart') as HTMLCanvasElement;
+    if (!canvas) {
+      console.log('Canvas element not found!');
+      return;
+    }
+
+    if (this.chart) {
+      console.log('Destroying existing chart...');
+      this.chart.destroy();
+    }
+
+    console.log('Creating chart for:', user.name);
+
+    this.chart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: user.workouts,
+        datasets: [
+          {
+            label: 'Minutes per Workout',
+            data: user.workoutMinutes,
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom'
-          },
           title: {
             display: true,
-            text: 'Total Minutes by Workout Type'
+            text: `${user.name}'s Workout Breakdown`
+          },
+          legend: {
+            position: 'top',
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Minutes'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Workout Sessions'
+            }
           }
         }
       }
-    };
+    });
+  }
 
-    // Note: You'll need to add Chart.js to your project and use it here
-    // new Chart(document.getElementById(this.chartId), config);
+  ngOnDestroy() {
+    if (this.chart) {
+      console.log('Destroying chart on component destroy...');
+      this.chart.destroy();
+    }
   }
 }

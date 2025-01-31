@@ -1,0 +1,59 @@
+<div class="max-w-4xl mx-auto p-6 bg-gray-100 dark:bg-gray-900 rounded-lg shadow-md">
+  <div class="mb-4">
+    <input 
+      type="text" 
+      placeholder="Search workouts..." 
+      (input)="onSearch($event)"
+      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+  </div>
+
+  <!-- Dropdown for workout filter -->
+  <div class="mb-4">
+    <label for="workoutFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Workout Type:</label>
+    <select id="workoutFilter" (change)="onFilterChange($event)" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="">All Workouts</option>
+      <option *ngFor="let workout of workoutTypes" [value]="workout">{{ workout }}</option>
+    </select>
+  </div>
+
+  <table class="w-full border-collapse bg-white dark:bg-gray-800 shadow-md rounded-lg">
+    <thead class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+      <tr>
+        <th class="py-2 px-4 border">Name</th>
+        <th class="py-2 px-4 border">Workouts</th>
+        <th class="py-2 px-4 border">Number of Workouts</th>
+        <th class="py-2 px-4 border">Total Minutes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let workout of filteredWorkouts" class="border-b hover:bg-gray-100 dark:hover:bg-gray-600">
+        <td class="py-2 px-4">{{ workout?.name || 'N/A' }}</td>
+        <td class="py-2 px-4">{{ workout?.workouts?.join(', ') || 'No workouts' }}</td>
+        <td class="py-2 px-4 text-center">{{ workout?.numberOfWorkouts || 0 }}</td>
+        <td class="py-2 px-4 text-center">{{ workout?.totalWorkoutMinutes || 0 }}</td>
+      </tr>
+      <tr *ngIf="!filteredWorkouts?.length">
+        <td colspan="4" class="py-4 text-center text-gray-500 dark:text-gray-400">No workouts found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mt-4 flex justify-between items-center">
+    <button 
+      (click)="previousPage()" 
+      [disabled]="currentPage === 1"
+      class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400"
+    >
+      Previous
+    </button>
+    <span class="text-gray-700 dark:text-gray-300">Page {{ currentPage }}</span>
+    <button 
+      (click)="nextPage()" 
+      [disabled]="!hasNextPage()"
+      class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400"
+    >
+      Next
+    </button>
+  </div>
+</div>
