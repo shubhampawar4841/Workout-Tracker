@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "health-challenge-tracker/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/health-challenge-tracker"  // Adjusted output directory
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"  // Updated path to the correct index.html
+    }
+  ]
+}
