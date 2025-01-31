@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { WorkoutFormComponent } from './components/workout-form/workout-form.component';
 import { WorkoutListComponent } from './components/workout-list/workout-list.component';
 import { WorkoutChartComponent } from './components/workout-chart/workout-chart.component';
-
 import {Chart,registerables} from 'chart.js'
+
 Chart.register(...registerables);
 @Component({
   selector: 'app-root',
